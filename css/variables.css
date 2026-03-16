@@ -1,0 +1,78 @@
+/* 
+ * Design System Variables
+ * Smart Theme: Sleek dark mode with cyber/glassmorphism accents
+ */
+ :root {
+    /* Primary Brand Colors - Cool cyan/indigo mix */
+    --brand-blue: 200 100% 60%;     /* Electric Cyan */
+    --brand-blue-hover: 200 100% 70%; 
+    --brand-indigo: 260 100% 70%;   /* Neon Indigo */
+    
+    /* Semantic Colors */
+    --success: 150 100% 40%;
+    --warning: 40 100% 60%;
+    --danger: 350 100% 65%;
+    
+    /* Neutral Palette (Deep sleek dark) */
+    --bg-base: 230 25% 6%;        /* Very deep blue-black */
+    --bg-surface: 230 20% 12%;     /* Elevated surfaces */
+    --bg-surface-hover: 230 20% 16%;
+    
+    --border-subtle: 230 20% 18%;
+    --border-strong: 230 20% 30%;
+    
+    /* Typography */
+    --text-primary: 210 20% 98%;   
+    --text-secondary: 220 15% 75%; 
+    --text-tertiary: 220 15% 55%;
+    
+    /* Metrics */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 20px;
+    --radius-pill: 9999px;
+    
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-5: 1.5rem;
+    --space-6: 2rem;
+    --space-8: 3rem;
+    
+    /* Shadows & Glows */
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.4);
+    --shadow-md: 0 8px 16px -4px rgba(0,0,0,0.5);
+    --shadow-lg: 0 16px 32px -8px rgba(0,0,0,0.6);
+    --shadow-glow: 0 0 20px hsl(var(--brand-blue) / 0.4);
+    
+    /* Glassmorphism Tokens */
+    --glass-bg: rgba(18, 22, 33, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.05);
+
+    /* Grid configuration (Default -> Desktop) */
+    --grid-columns: 12;
+    --grid-gap: 1.5rem;
+}
+
+/* Light Theme Overrides */
+[data-theme="light"] {
+    --bg-base: 210 20% 98%;
+    --bg-surface: 0 0% 100%;
+    --bg-surface-hover: 210 16% 93%;
+    
+    --border-subtle: 210 14% 89%;
+    --border-strong: 210 14% 83%;
+    
+    --text-primary: 230 25% 15%;   
+    --text-secondary: 230 20% 40%; 
+    --text-tertiary: 230 15% 60%;
+    
+    --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+    --shadow-md: 0 8px 16px -4px rgba(0,0,0,0.1);
+    --shadow-lg: 0 16px 32px -8px rgba(0,0,0,0.15);
+    --shadow-glow: 0 0 20px hsl(var(--brand-blue) / 0.2);
+    
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(0, 0, 0, 0.05);
+}

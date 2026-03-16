@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom Dashboard Builder</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Icons (Lucide) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Mobile Drag and Drop Polyfill -->
+    <script src="https://cdn.jsdelivr.net/npm/mobile-drag-drop@2.3.0-rc.2/index.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mobile-drag-drop@2.3.0-rc.2/default.css">
+    <script>
+        MobileDragDrop.polyfill({
+            dragImageTranslateOverride: MobileDragDrop.scrollBehaviourDragImageTranslateOverride
+        });
+        window.addEventListener('touchmove', function() {}, {passive: false});
+    </script>
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/widgets.css">
+
+    <!-- Theme Initialization (Prevent flicker) -->
+    <script>
+        const savedTheme = localStorage.getItem('dashbuilder_theme') || 'dark';
+        if (savedTheme === 'light') {
+            document.documentElement.setAttribute('data-theme', 'light');
+        }
+    </script>
+    
+    <!-- Auth Guard: run before anything renders -->
+    <script>
+        const token = localStorage.getItem('dashbuilder_token');
+        if (!token && window.location.pathname.indexOf('login.html') === -1) {
+            window.location.href = 'login.html';
+        }
+    </script>
+</head>
+<body>
+
+    <!-- App Shell -->
+    <div class="app-container">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="app-sidebar">
+            <div class="sidebar-header">
+                <h2>DashBuilder</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-view="dashboard">
+                    <i data-lucide="layout-dashboard"></i>
+                    Dashboard
+                </button>
+                <button class="nav-item" data-view="customer-orders">
+                    <i data-lucide="users"></i>
+                    Customer Orders
+                </button>
+            </nav>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            
+            <!-- Top Header -->
+            <header class="app-header">
+                <div class="header-title" style="display: flex; align-items: center; gap: var(--space-3);">
+                    <button class="btn-icon mobile-menu-btn" id="btn-mobile-menu">
+                        <i data-lucide="menu"></i>
+                    </button>
+                    <h1 id="view-title">Dashboard</h1>
+                </div>
+                
+                <div class="header-actions">
+                    <!-- Date Filter -->
+                    <div class="date-filter-wrapper">
+                        <label for="date-filter" class="hide-mobile">Show data for:</label>
+                        <div class="select-wrapper">
+                            <select id="date-filter" class="premium-select">
+                                <option value="all">All time</option>
+                                <option value="today">Today</option>
+                                <option value="7days">Last 7 Days</option>
+                                <option value="30days">Last 30 Days</option>
+                                <option value="90days">Last 90 Days</option>
+                            </select>
+                            <i data-lucide="chevron-down" class="select-icon"></i>
+                        </div>
+                    </div>
+
+                    <!-- Config/Action Buttons -->
+                    <button class="btn btn-primary" id="btn-configure-dashboard" style="display: none;">
+                        <i data-lucide="settings-2"></i> <span class="hide-mobile">Configure Dashboard</span>
+                    </button>
+                    <button class="btn btn-outline" id="btn-toggle-sidebar" style="display: none;">
+                        <i data-lucide="layout-grid"></i> <span class="hide-mobile">Widgets</span>
+                    </button>
+                    <button class="btn btn-success" id="btn-save-dashboard" style="display: none;">
+                        <i data-lucide="save"></i> <span class="hide-mobile">Save</span>
+                    </button>
+                    <button class="btn btn-primary" id="btn-create-order" style="display: none;">
+                        <i data-lucide="plus"></i> <span class="hide-mobile">Create Order</span>
+                    </button>
+
+                    <!-- User Actions -->
+                    <div style="width: 1px; height: 32px; background-color: var(--glass-border); margin: 0 var(--space-2);"></div>
+                    
+                    <button class="btn-icon" id="btn-theme-toggle" title="Toggle Theme">
+                        <i data-lucide="sun" class="sun-icon" style="display: none;"></i>
+                        <i data-lucide="moon" class="moon-icon"></i>
+                    </button>
+
+                    <div class="user-profile-wrapper" id="user-profile-btn">
+                        <div class="user-profile" style="display: flex; align-items: center; gap: var(--space-2); margin-right: var(--space-2);">
+                            <img id="header-avatar-img" src="" alt="Profile Avatar" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; display: none; border: 1px solid var(--glass-border);">
+                            <i data-lucide="user-circle" id="header-avatar-icon" style="color: hsl(var(--text-secondary));"></i>
+                            <div class="user-meta hide-mobile">
+                                <span id="user-display-name" style="font-weight: 500; font-size: 0.9rem;">User</span>
+                            </div>
+                            <i data-lucide="chevron-down" style="width: 16px; height: 16px; color: hsl(var(--text-tertiary));"></i>
+                        </div>
+                        
+                        <!-- Dropdown Menu -->
+                        <div class="profile-dropdown" id="profile-dropdown-menu">
+                            <button class="dropdown-item" id="btn-nav-profile">
+                                <i data-lucide="user"></i>
+                                View Profile
+                            </button>
+                            <button class="dropdown-item" id="btn-nav-orders-summary">
+                                <i data-lucide="shopping-bag"></i>
+                                Orders Summary
+                            </button>
+                            <button class="dropdown-item" id="btn-logout" style="color: hsl(var(--danger));">
+                                <i data-lucide="log-out"></i>
+                                Logout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Views Container -->
+            <div class="views-container">
+                
+                <!-- Dashboard View -->
+                <div id="view-dashboard" class="view view-active">
+                    <!-- Default Empty State -->
+                    <div class="empty-state" id="dashboard-empty-state">
+                        <i data-lucide="layout-grid" class="empty-icon"></i>
+                        <h3>No widgets configured</h3>
+                        <p>Click "Configure Dashboard" to build your personalized view.</p>
+                        <button class="btn btn-outline" id="btn-empty-configure">Configure Dashboard</button>
+                    </div>
+
+                    <!-- Configurable Grid Canvas -->
+                    <div class="dashboard-canvas" id="dashboard-canvas" style="display: none;">
+                        <!-- Widgets will be dropped/rendered here -->
+                    </div>
+                </div>
+
+                <!-- Customer Orders View -->
+                <div id="view-customer-orders" class="view">
+                    
+                    <div class="orders-toolbar" style="display: flex; flex-wrap: wrap; gap: var(--space-3); margin-bottom: var(--space-4); align-items: center; justify-content: space-between;">
+                        <div style="display: flex; gap: var(--space-3); flex: 1; max-width: 600px; min-width: 300px;">
+                            <div class="form-group" style="flex: 1; margin: 0;">
+                                <div class="input-prefix" style="position: relative;">
+                                    <i data-lucide="search" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: hsl(var(--text-secondary)); pointer-events: none;"></i>
+                                    <input type="text" id="orders-search-input" placeholder="Search by customer name or email..." style="padding-left: 2.2rem; width: 100%;">
+                                </div>
+                            </div>
+                            <div class="form-group" style="width: 160px; margin: 0;">
+                                <select id="orders-status-filter" style="width: 100%;">
+                                    <option value="All">All Statuses</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="In progress">In progress</option>
+                                    <option value="Completed">Completed</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="data-table" id="orders-table">
+                            <thead>
+                                <tr>
+                                    <th>Customer Name</th>
+                                    <th>Email</th>
+                                    <th>Product</th>
+                                    <th>Status</th>
+                                    <th>Total Amount</th>
+                                    <th>Order Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Orders will be rendered here -->
+                            </tbody>
+                        </table>
+                        
+                        <!-- Empty State for Orders -->
+                        <div class="empty-state" id="orders-empty-state">
+                            <i data-lucide="inbox" class="empty-icon"></i>
+                            <h3>No Orders Found</h3>
+                            <p>Get started by creating a new customer order or matching your search criteria.</p>
+                        </div>
+                    </div>
+
+                    <!-- Pagination Controls -->
+                    <div class="pagination-controls" id="orders-pagination" style="display: none; justify-content: space-between; align-items: center; margin-top: var(--space-4); padding: var(--space-3) 0; border-top: 1px solid var(--glass-border);">
+                        <div style="color: hsl(var(--text-secondary)); font-size: 0.85rem;">
+                            Showing <span id="page-start-idx" style="font-weight: 500; color: hsl(var(--text-primary));">0</span> 
+                            to <span id="page-end-idx" style="font-weight: 500; color: hsl(var(--text-primary));">0</span> 
+                            of <span id="page-total-idx" style="font-weight: 500; color: hsl(var(--text-primary));">0</span> entries
+                        </div>
+                        <div style="display: flex; gap: var(--space-2); align-items: center;">
+                            <button class="btn btn-outline" id="btn-page-prev" disabled style="padding: 0.3rem 0.6rem; font-size: 0.85rem;">Previous</button>
+                            <span id="page-numbers" style="display: flex; gap: 4px; align-items: center; margin: 0 var(--space-2);"></span>
+                            <button class="btn btn-outline" id="btn-page-next" disabled style="padding: 0.3rem 0.6rem; font-size: 0.85rem;">Next</button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Profile Management View -->
+                <div id="view-profile" class="view">
+                    <div style="display: grid; grid-template-columns: 1fr; gap: var(--space-4); max-width: 800px;">
+                        
+                        <!-- Account Details Card -->
+                        <div class="form-section">
+                            <div style="display: flex; align-items: center; gap: var(--space-3); margin-bottom: var(--space-4); padding-bottom: var(--space-3); border-bottom: 1px solid var(--glass-border);">
+                                <img id="profile-page-avatar-img" src="" alt="Profile Avatar" style="width: 64px; height: 64px; border-radius: 50%; object-fit: cover; display: none; border: 2px solid hsl(var(--brand-blue) / 0.5);">
+                                <div id="profile-page-avatar-icon" style="width: 64px; height: 64px; border-radius: 50%; background-color: var(--glass-bg); display: flex; align-items: center; justify-content: center; border: 1px solid var(--glass-border);">
+                                    <i data-lucide="user" style="width: 32px; height: 32px; color: hsl(var(--text-secondary));"></i>
+                                </div>
+                                <div>
+                                    <h3 style="margin: 0; border: none; padding: 0; font-size: 1.25rem;" id="profile-display-username">Loading...</h3>
+                                    <span style="color: hsl(var(--text-secondary)); font-size: 0.9rem;">Member</span>
+                                </div>
+                            </div>
+                            <h3>Account Information</h3>
+                            <div class="flex-column" style="display: flex; flex-direction: column; gap: var(--space-4);">
+                                <div class="info-group">
+                                    <label style="font-size: 0.85rem; color: hsl(var(--text-secondary));">Username</label>
+                                    <div id="profile-display-username" style="font-size: 1.1rem; font-weight: 500; margin-top: 4px;">Loading...</div>
+                                </div>
+                                <div class="info-group">
+                                    <label style="font-size: 0.85rem; color: hsl(var(--text-secondary));">Email</label>
+                                    <div id="profile-display-email" style="font-size: 1.1rem; font-weight: 500; margin-top: 4px;">Loading...</div>
+                                </div>
+                                <div class="info-group">
+                                    <label style="font-size: 0.85rem; color: hsl(var(--text-secondary));">Password Hint</label>
+                                    <div id="profile-display-password" style="font-size: 1.1rem; font-weight: 500; margin-top: 4px; letter-spacing: 2px;">********</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Update Forms -->
+                        <div style="display: flex; flex-direction: column; gap: var(--space-4);">
+                            <!-- Update Email Form -->
+                            <form id="form-update-email" class="form-section">
+                                <h3>Update Email</h3>
+                                <div class="form-group" style="margin-bottom: var(--space-4);">
+                                    <label for="update-email">New Email Address</label>
+                                    <input type="email" id="update-email" required placeholder="name@example.com">
+                                </div>
+                                <button type="submit" class="btn btn-primary" style="width: 100%;">Update Email</button>
+                            </form>
+
+                            <!-- Update Avatar -->
+                        <div class="form-section">
+                            <h3>Profile Picture</h3>
+                            <form id="form-update-avatar" class="premium-form">
+                                <div class="form-group">
+                                    <label>Avatar Image URL</label>
+                                    <div class="input-prefix">
+                                        <i data-lucide="image" class="prefix-symbol" style="width: 16px; height: 16px;"></i>
+                                        <input type="url" id="update-avatar-url" placeholder="https://example.com/my-photo.jpg">
+                                    </div>
+                                    <span style="font-size: 0.75rem; color: hsl(var(--text-tertiary)); margin-top: 4px;">Provide a direct link to an image. Leave blank to remove your avatar.</span>
+                                </div>
+                                <div style="display: flex; justify-content: flex-end;">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i data-lucide="upload"></i>
+                                        Set Avatar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Update Password Form -->
+                            <form id="form-update-password" class="form-section">
+                                <h3>Update Password</h3>
+                                <div class="form-group" style="margin-bottom: var(--space-3);">
+                                    <label for="current-password">Current Password</label>
+                                    <input type="password" id="current-password" required>
+                                </div>
+                                <div class="form-group" style="margin-bottom: var(--space-4);">
+                                    <label for="new-password">New Password</label>
+                                    <input type="password" id="new-password" required minlength="6">
+                                </div>
+                                <button type="submit" class="btn btn-primary" style="width: 100%;">Change Password</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+
+        <!-- Widget Selector Sidebar (Slides in from right during configuration) -->
+        <aside class="widget-sidebar" id="widget-sidebar">
+            <div class="sidebar-header">
+                <h3>Available Widgets</h3>
+                <button class="btn-icon" id="btn-close-widget-sidebar">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="widget-list" id="draggable-widgets-list">
+                
+                <div class="widget-category">
+                    <h4>Charts</h4>
+                    <div class="widget-item draggable" draggable="true" data-type="chart" data-subtype="bar">
+                        <i data-lucide="bar-chart-2"></i> Bar Chart
+                    </div>
+                    <div class="widget-item draggable" draggable="true" data-type="chart" data-subtype="line">
+                        <i data-lucide="line-chart"></i> Line Chart
+                    </div>
+                    <div class="widget-item draggable" draggable="true" data-type="chart" data-subtype="pie">
+                        <i data-lucide="pie-chart"></i> Pie Chart
+                    </div>
+                    <div class="widget-item draggable" draggable="true" data-type="chart" data-subtype="area">
+                        <i data-lucide="trending-up"></i> Area Chart
+                    </div>
+                    <div class="widget-item draggable" draggable="true" data-type="chart" data-subtype="scatter">
+                        <i data-lucide="scatter-chart"></i> Scatter Plot
+                    </div>
+                </div>
+
+                <div class="widget-category">
+                    <h4>Tables</h4>
+                    <div class="widget-item draggable" draggable="true" data-type="table">
+                        <i data-lucide="table"></i> Data Table
+                    </div>
+                </div>
+
+                <div class="widget-category">
+                    <h4>KPIs</h4>
+                    <div class="widget-item draggable" draggable="true" data-type="kpi">
+                        <i data-lucide="activity"></i> KPI Value
+                    </div>
+                </div>
+
+            </div>
+        </aside>
+
+        <!-- Sidebar Overlay (Mobile) -->
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+        <!-- Modals overlay -->
+        <div class="modal-overlay" id="modal-overlay"></div>
+
+        <!-- Create Order Modal -->
+        <dialog class="modal" id="modal-create-order">
+            <div class="modal-header">
+                <h2>Create Customer Order</h2>
+                <button class="btn-icon modal-close">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="form-create-order" class="premium-form">
+                    
+                    <div class="form-section">
+                        <h3>Customer Information</h3>
+                        <div class="form-grid two-cols">
+                            <div class="form-group">
+                                <label for="firstName">First name <span class="required">*</span></label>
+                                <input type="text" id="firstName" name="firstName" required>
+                                <span class="error-msg">Please fill the field</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="lastName">Last name <span class="required">*</span></label>
+                                <input type="text" id="lastName" name="lastName" required>
+                                <span class="error-msg">Please fill the field</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="emailId">Email id <span class="required">*</span></label>
+                                <input type="email" id="emailId" name="emailId" required>
+                                <span class="error-msg">Please fill the field</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="phoneNumber">Phone number <span class="required">*</span></label>
+                                <input type="tel" id="phoneNumber" name="phoneNumber" required>
+                                <span class="error-msg">Please fill the field</span>
+                            </div>
+                            <div class="form-group span-2">
+                                <label for="streetAddress">Street Address <span class="required">*</span></label>
+                                <input type="text" id="streetAddress" name="streetAddress" required>
+                                <span class="error-msg">Please fill the field</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="city">City <span class="required">*</span></label>
+                                <input type="text" id="city" name="city" required>
+                                <span class="error-msg">Please fill the field</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="state">State / Province <span class="required">*</span></label>
+                                <input type="text" id="state" name="state" required>
+                                <span class="error-msg">Please fill the field</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="postalCode">Postal code <span class="required">*</span></label>
+                                <input type="text" id="postalCode" name="postalCode" required>
+                                <span class="error-msg">Please fill the field</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="country">Country <span class="required">*</span></label>
+                                <select id="country" name="country" required>
+                                    <option value="">Select an option</option>
+                                    <option value="United States">United States</option>
+                                    <option value="Canada">Canada</option>
+                                    <option value="Australia">Australia</option>
+                                    <option value="Singapore">Singapore</option>
+                                    <option value="Hong Kong">Hong Kong</option>
+                                </select>
+                                <span class="error-msg">Please fill the field</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>Order Information</h3>
+                        <div class="form-grid two-cols">
+                            <div class="form-group span-2">
+                                <label for="product">Choose product <span class="required">*</span></label>
+                                <select id="product" name="product" required>
+                                    <option value="">Select an option</option>
+                                    <option value="Fiber Internet 300 Mbps">Fiber Internet 300 Mbps</option>
+                                    <option value="5GUnlimited Mobile Plan">5GUnlimited Mobile Plan</option>
+                                    <option value="Fiber Internet 1 Gbps">Fiber Internet 1 Gbps</option>
+                                    <option value="Business Internet 500 Mbps">Business Internet 500 Mbps</option>
+                                    <option value="VoIP Corporate Package">VoIP Corporate Package</option>
+                                </select>
+                                <span class="error-msg">Please fill the field</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="quantity">Quantity <span class="required">*</span></label>
+                                <input type="number" id="quantity" name="quantity" min="1" value="1" required>
+                                <span class="error-msg">Please fill the field</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="unitPrice">Unit price <span class="required">*</span></label>
+                                <div class="input-prefix">
+                                    <span class="prefix-symbol">$</span>
+                                    <input type="number" id="unitPrice" name="unitPrice" step="0.01" min="0" required>
+                                </div>
+                                <span class="error-msg">Please fill the field</span>
+                            </div>
+                            <div class="form-group span-2">
+                                <label for="totalAmount">Total amount <span class="required">*</span></label>
+                                <div class="input-prefix">
+                                    <span class="prefix-symbol">$</span>
+                                    <input type="text" id="totalAmount" name="totalAmount" readonly class="readonly-input">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="status">Status <span class="required">*</span></label>
+                                <select id="status" name="status" required>
+                                    <option value="Pending">Pending</option>
+                                    <option value="In progress">In progress</option>
+                                    <option value="Completed">Completed</option>
+                                </select>
+                                <span class="error-msg">Please fill the field</span>
+                            </div>
+                            <div class="form-group">
+                                <label for="createdBy">Created by <span class="required">*</span></label>
+                                <select id="createdBy" name="createdBy" required>
+                                    <option value="">Select an option</option>
+                                    <option value="Mr. Michael Harris">Mr. Michael Harris</option>
+                                    <option value="Mr. Ryan Cooper">Mr. Ryan Cooper</option>
+                                    <option value="Ms. Olivia Carter">Ms. Olivia Carter</option>
+                                    <option value="Mr. Lucas Martin">Mr. Lucas Martin</option>
+                                </select>
+                                <span class="error-msg">Please fill the field</span>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline modal-cancel">Cancel</button>
+                <button type="button" class="btn btn-primary" id="btn-submit-order">Submit</button>
+            </div>
+        </dialog>
+
+        <!-- Widget Configuration Modal (Dynamically loaded content based on widget type) -->
+        <dialog class="modal" id="modal-config-widget">
+            <div class="modal-header">
+                <h2>Widget Settings</h2>
+                <button class="btn-icon modal-close">
+                    <i data-lucide="x"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="form-config-widget" class="premium-form">
+                    <!-- Dynamic rendering happens here -> js/ui.js -->
+                    <div id="dynamic-widget-config"></div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" id="btn-delete-widget-modal">Delete Widget</button>
+                <button type="button" class="btn btn-primary" id="btn-save-widget-config">Save Settings</button>
+            </div>
+        </dialog>
+
+    </div>
+
+    <!-- Toast Notifications Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <!-- Scripts -->
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

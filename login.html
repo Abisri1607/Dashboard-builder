@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - DashBuilder</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/components.css">
+    <style>
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-4);
+        }
+        .auth-card {
+            background-color: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-lg);
+            padding: var(--space-6);
+            width: 100%;
+            max-width: 400px;
+            box-shadow: var(--shadow-lg), var(--shadow-glow);
+        }
+        .auth-header {
+            text-align: center;
+            margin-bottom: var(--space-6);
+        }
+        .auth-header h1 {
+            background: linear-gradient(135deg, hsl(var(--brand-blue)), hsl(var(--brand-indigo)));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2rem;
+            margin-bottom: var(--space-2);
+        }
+        .auth-header p {
+            color: hsl(var(--text-secondary));
+        }
+        .auth-form-group {
+            margin-bottom: var(--space-4);
+        }
+        .auth-btn {
+            width: 100%;
+            margin-top: var(--space-2);
+        }
+        .auth-switch {
+            text-align: center;
+            margin-top: var(--space-4);
+            color: hsl(var(--text-secondary));
+            font-size: 0.9rem;
+        }
+        .auth-switch a {
+            color: hsl(var(--brand-blue));
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .auth-switch a:hover {
+            text-decoration: underline;
+        }
+        .auth-error {
+            color: hsl(var(--danger));
+            font-size: 0.85rem;
+            margin-bottom: var(--space-3);
+            text-align: center;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>DashBuilder</h1>
+                <p id="auth-subtitle">Sign in to your account</p>
+            </div>
+            
+            <div id="auth-error-msg" class="auth-error">Error message here</div>
+
+            <!-- Login Form -->
+            <form id="login-form">
+                <div class="auth-form-group">
+                    <label>Email</label>
+                    <input type="email" id="login-email" required>
+                </div>
+                <div class="auth-form-group">
+                    <label>Password</label>
+                    <input type="password" id="login-password" required>
+                </div>
+                <button type="submit" class="btn btn-primary auth-btn">Login</button>
+                <div class="auth-switch">
+                    Don't have an account? <a id="switch-to-register">Sign up</a>
+                </div>
+            </form>
+
+            <!-- Register Form (Hidden by default) -->
+            <form id="register-form" style="display: none;">
+                <div class="auth-form-group">
+                    <label>Username</label>
+                    <input type="text" id="reg-username" required>
+                </div>
+                <div class="auth-form-group">
+                    <label>Email</label>
+                    <input type="email" id="reg-email" required>
+                </div>
+                <div class="auth-form-group">
+                    <label>Password</label>
+                    <input type="password" id="reg-password" required minlength="6">
+                </div>
+                <button type="submit" class="btn btn-primary auth-btn">Create Account</button>
+                <div class="auth-switch">
+                    Already have an account? <a id="switch-to-login">Log in</a>
+                </div>
+            </form>
+        </div>
+    </div>
+    <script src="js/auth.js"></script>
+</body>
+</html>

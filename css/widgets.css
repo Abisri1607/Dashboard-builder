@@ -1,0 +1,200 @@
+/* 
+ * Dashboard Widgets 
+ */
+
+/* Draggable Items in Sidebar */
+.widget-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    background-color: rgba(255,255,255,0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-md);
+    margin-bottom: var(--space-2);
+    cursor: grab;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+}
+
+.widget-item:hover {
+    background-color: hsl(var(--bg-surface-hover));
+    border-color: hsl(var(--brand-blue));
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.widget-item:active {
+    cursor: grabbing;
+    transform: translateY(0);
+}
+
+/* Base Widget Container on Canvas */
+.dashboard-widget {
+    background-color: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-md);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    animation: dropIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    
+    /* Responsive Grid Spans */
+    grid-column-end: span min(var(--widget-width, 4), var(--grid-columns));
+    grid-row-end: span var(--widget-height, 4);
+}
+
+.dashboard-widget:hover {
+    box-shadow: var(--shadow-lg);
+    border-color: hsl(var(--border-strong));
+}
+
+@keyframes dropIn {
+    from { opacity: 0; transform: scale(0.9) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Widget Header */
+.widget-header {
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--glass-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: rgba(0,0,0,0.2);
+}
+
+.widget-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Widget Action Buttons (Hover to Reveal) */
+.widget-actions {
+    display: flex;
+    gap: var(--space-1);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.dashboard-widget:hover .widget-actions,
+.config-mode .widget-actions {
+    opacity: 1;
+}
+
+@media (hover: none) {
+    .widget-actions {
+        opacity: 1;
+    }
+}
+
+.widget-action-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: hsl(var(--text-secondary));
+    transition: all 0.2s ease;
+}
+
+.widget-action-btn.settings:hover {
+    background-color: hsl(var(--brand-blue) / 0.15);
+    color: hsl(var(--brand-blue));
+}
+
+.widget-action-btn.delete:hover {
+    background-color: hsl(var(--danger) / 0.15);
+    color: hsl(var(--danger));
+}
+
+/* Widget Body */
+.widget-body {
+    padding: var(--space-4);
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    min-height: 100px; /* Base minimum */
+}
+
+/* Specific Widget Types */
+
+/* KPI Card */
+.kpi-widget .widget-body {
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.kpi-value {
+    font-size: 3rem;
+    font-weight: 700;
+    color: hsl(var(--text-primary));
+    line-height: 1.1;
+    margin-bottom: var(--space-1);
+    background: linear-gradient(135deg, #fff, hsl(var(--text-secondary)));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 30px rgba(255,255,255,0.1);
+}
+
+.kpi-desc {
+    font-size: 0.85rem;
+    color: hsl(var(--text-secondary));
+}
+
+/* Chart Canvas Wrapper */
+.chart-wrapper {
+    position: relative;
+    height: 100%;
+    width: 100%;
+    min-height: 200px;
+}
+
+/* Table Widget specific tweaks */
+.table-widget .widget-body {
+    padding: 0;
+    overflow: auto;
+}
+
+.table-widget .data-table {
+    border: none;
+    box-shadow: none;
+}
+
+/* Drag and Drop Placeholders & States */
+.drag-placeholder {
+    background-color: hsl(var(--brand-blue) / 0.1);
+    border: 2px dashed hsl(var(--brand-blue));
+    border-radius: var(--radius-lg);
+    min-height: 150px;
+    transition: all 0.2s ease;
+    
+    /* Responsive Grid Spans */
+    grid-column-end: span min(var(--widget-width, 4), var(--grid-columns));
+    grid-row-end: span var(--widget-height, 4);
+}
+
+.widget-dragging {
+    opacity: 0.5;
+    transform: scale(0.95);
+}
+
+.canvas-drag-over {
+    background-color: hsl(var(--bg-surface-hover) / 0.5) !important;
+}
