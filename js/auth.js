@@ -6,7 +6,8 @@ const switchToLogin = document.getElementById('switch-to-login');
 const subtitle = document.getElementById('auth-subtitle');
 const errorMsg = document.getElementById('auth-error-msg');
 
-const API_BASE = 'http://localhost:3000/api/auth';
+// Use relative URL so it works on Render automatically
+const API_BASE = '/api/auth';
 
 // Toggle views
 if (switchToRegister) {

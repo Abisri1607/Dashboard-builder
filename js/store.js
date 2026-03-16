@@ -5,7 +5,8 @@ class Store {
         this.customer_orders = [];
         this.listeners = [];
         this.dateFilter = 'all';
-        this.apiBase = 'http://localhost:3000/api/data';
+        // Use relative URL so it works on Render automatically
+        this.apiBase = '/api/data';
     }
 
     subscribe(listener) {
