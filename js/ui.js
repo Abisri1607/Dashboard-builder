@@ -92,6 +92,7 @@ class UIController {
 
         // Profile View Elements
         this.profileDisplayUsername = document.getElementById('profile-display-username');
+        this.profileDisplayUsernameInfo = document.getElementById('profile-display-username-info');
         this.profileDisplayEmail = document.getElementById('profile-display-email');
         this.profileDisplayPassword = document.getElementById('profile-display-password');
         this.formUpdateEmail = document.getElementById('form-update-email');
@@ -905,13 +906,14 @@ class UIController {
         if (!token) return;
 
         try {
-            const res = await fetch('http://localhost:3000/api/auth/me', {
+            const res = await fetch('/api/auth/me', {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
 
             if (res.ok) {
                 if(this.profileDisplayUsername) this.profileDisplayUsername.textContent = data.username;
+                if(this.profileDisplayUsernameInfo) this.profileDisplayUsernameInfo.textContent = data.username;
                 if(this.profileDisplayEmail) this.profileDisplayEmail.textContent = data.email;
                 if(this.profileDisplayPassword) this.profileDisplayPassword.textContent = data.passwordHint || '********';
                 
@@ -955,9 +957,9 @@ class UIController {
         this.setButtonLoading(submitBtn, true);
 
         try {
-            const res = await fetch('http://localhost:3000/api/auth/email', {
+            const res = await fetch('/api/auth/email', {
                 method: 'PUT',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
@@ -995,9 +997,9 @@ class UIController {
         this.setButtonLoading(submitBtn, true);
 
         try {
-            const res = await fetch('http://localhost:3000/api/auth/password', {
+            const res = await fetch('/api/auth/password', {
                 method: 'PUT',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
@@ -1032,9 +1034,9 @@ class UIController {
         this.setButtonLoading(submitBtn, true);
 
         try {
-            const res = await fetch('http://localhost:3000/api/auth/avatar', {
+            const res = await fetch('/api/auth/avatar', {
                 method: 'PUT',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
