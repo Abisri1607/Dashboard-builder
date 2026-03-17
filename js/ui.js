@@ -99,6 +99,9 @@ class UIController {
         this.formUpdatePassword = document.getElementById('form-update-password');
         this.formUpdateAvatar = document.getElementById('form-update-avatar');
 
+        console.log('Cached username element:', this.profileDisplayUsername);
+        console.log('Cached username info element:', this.profileDisplayUsernameInfo);
+
         this.headerAvatarImg = document.getElementById('header-avatar-img');
         this.headerAvatarIcon = document.getElementById('header-avatar-icon');
         
@@ -911,39 +914,55 @@ class UIController {
             });
             const data = await res.json();
             console.log('Profile data:', data);
-            console.log('profileDisplayUsername element:', this.profileDisplayUsername);
-            console.log('Username value to set:', data.username);
 
             if (res.ok) {
-                if(this.profileDisplayUsername) {
-                    console.log('Setting username to:', data.username);
-                    this.profileDisplayUsername.textContent = data.username;
-                    console.log('After setting, element text is:', this.profileDisplayUsername.textContent);
+                // Use direct querySelector to ensure we're updating the right elements
+                const usernameEl = document.getElementById('profile-display-username');
+                const usernameInfoEl = document.getElementById('profile-display-username-info');
+                const emailEl = document.getElementById('profile-display-email');
+                const passwordEl = document.getElementById('profile-display-password');
+                
+                console.log('Direct querySelector - username element:', usernameEl);
+                console.log('Direct querySelector - username info element:', usernameInfoEl);
+                
+                if(usernameEl) {
+                    console.log('Updating username to:', data.username);
+                    usernameEl.textContent = data.username;
                 }
-                if(this.profileDisplayUsernameInfo) this.profileDisplayUsernameInfo.textContent = data.username;
-                if(this.profileDisplayEmail) this.profileDisplayEmail.textContent = data.email;
-                if(this.profileDisplayPassword) this.profileDisplayPassword.textContent = data.passwordHint || '********';
+                if(usernameInfoEl) {
+                    console.log('Updating username info to:', data.username);
+                    usernameInfoEl.textContent = data.username;
+                }
+                if(emailEl) emailEl.textContent = data.email;
+                if(passwordEl) passwordEl.textContent = data.passwordHint || '********';
+                
+                // Avatar updates - also use direct selectors
+                const headerAvatarImg = document.getElementById('header-avatar-img');
+                const headerAvatarIcon = document.getElementById('header-avatar-icon');
+                const profilePageAvatarImg = document.getElementById('profile-page-avatar-img');
+                const profilePageAvatarIcon = document.getElementById('profile-page-avatar-icon');
+                const updateAvatarUrlInput = document.getElementById('update-avatar-url');
                 
                 if (data.avatarUrl) {
-                    if (this.headerAvatarImg) {
-                        this.headerAvatarImg.src = data.avatarUrl;
-                        this.headerAvatarImg.style.display = 'block';
+                    if (headerAvatarImg) {
+                        headerAvatarImg.src = data.avatarUrl;
+                        headerAvatarImg.style.display = 'block';
                     }
-                    if (this.headerAvatarIcon) this.headerAvatarIcon.style.display = 'none';
+                    if (headerAvatarIcon) headerAvatarIcon.style.display = 'none';
                     
-                    if (this.profilePageAvatarImg) {
-                        this.profilePageAvatarImg.src = data.avatarUrl;
-                        this.profilePageAvatarImg.style.display = 'block';
+                    if (profilePageAvatarImg) {
+                        profilePageAvatarImg.src = data.avatarUrl;
+                        profilePageAvatarImg.style.display = 'block';
                     }
-                    if (this.profilePageAvatarIcon) this.profilePageAvatarIcon.style.display = 'none';
-                    if (this.updateAvatarUrlInput) this.updateAvatarUrlInput.value = data.avatarUrl;
+                    if (profilePageAvatarIcon) profilePageAvatarIcon.style.display = 'none';
+                    if (updateAvatarUrlInput) updateAvatarUrlInput.value = data.avatarUrl;
                 } else {
-                    if (this.headerAvatarImg) this.headerAvatarImg.style.display = 'none';
-                    if (this.headerAvatarIcon) this.headerAvatarIcon.style.display = 'block';
+                    if (headerAvatarImg) headerAvatarImg.style.display = 'none';
+                    if (headerAvatarIcon) headerAvatarIcon.style.display = 'block';
                     
-                    if (this.profilePageAvatarImg) this.profilePageAvatarImg.style.display = 'none';
-                    if (this.profilePageAvatarIcon) this.profilePageAvatarIcon.style.display = 'flex';
-                    if (this.updateAvatarUrlInput) this.updateAvatarUrlInput.value = '';
+                    if (profilePageAvatarImg) profilePageAvatarImg.style.display = 'none';
+                    if (profilePageAvatarIcon) profilePageAvatarIcon.style.display = 'flex';
+                    if (updateAvatarUrlInput) updateAvatarUrlInput.value = '';
                 }
             } else {
                 this.showToast(data.message || 'Failed to load profile', 'error');
