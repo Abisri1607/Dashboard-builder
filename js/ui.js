@@ -916,54 +916,73 @@ class UIController {
             console.log('Profile data:', data);
 
             if (res.ok) {
-                // Helper function to update element with retry
-                const updateElement = (elementId, value, retries = 3, delay = 100) => {
-                    const el = document.getElementById(elementId);
-                    if (el) {
-                        console.log(`Updating ${elementId} to:`, value);
-                        el.textContent = value;
-                    } else if (retries > 0) {
-                        console.log(`Element ${elementId} not found yet, retrying...`);
-                        setTimeout(() => updateElement(elementId, value, retries - 1, delay), delay);
-                    } else {
-                        console.warn(`Element ${elementId} not found after retries`);
+                // Wait a bit for DOM to be ready, then update
+                const updateWithDelay = () => {
+                    // Use direct DOM queries
+                    const username = document.getElementById('profile-display-username');
+                    const usernameInfo = document.getElementById('profile-display-username-info');
+                    const email = document.getElementById('profile-display-email');
+                    const password = document.getElementById('profile-display-password');
+                    
+                    console.log('Elements found:', {
+                        username: !!username,
+                        usernameInfo: !!usernameInfo,
+                        email: !!email,
+                        password: !!password
+                    });
+
+                    if (username) {
+                        console.log('Setting username to:', data.username);
+                        username.textContent = data.username;
+                    }
+                    if (usernameInfo) {
+                        console.log('Setting username info to:', data.username);
+                        usernameInfo.textContent = data.username;
+                    }
+                    if (email) {
+                        console.log('Setting email to:', data.email);
+                        email.textContent = data.email;
+                    }
+                    if (password) {
+                        console.log('Setting password to:', data.passwordHint);
+                        password.textContent = data.passwordHint || '********';
                     }
                 };
 
-                // Update all profile fields
-                updateElement('profile-display-username', data.username);
-                updateElement('profile-display-username-info', data.username);
-                updateElement('profile-display-email', data.email);
-                updateElement('profile-display-password', data.passwordHint || '********');
+                // Try immediately, then again after delay
+                updateWithDelay();
+                setTimeout(updateWithDelay, 200);
                 
-                // Avatar updates - also use direct selectors
-                const headerAvatarImg = document.getElementById('header-avatar-img');
-                const headerAvatarIcon = document.getElementById('header-avatar-icon');
-                const profilePageAvatarImg = document.getElementById('profile-page-avatar-img');
-                const profilePageAvatarIcon = document.getElementById('profile-page-avatar-icon');
-                const updateAvatarUrlInput = document.getElementById('update-avatar-url');
-                
-                if (data.avatarUrl) {
-                    if (headerAvatarImg) {
-                        headerAvatarImg.src = data.avatarUrl;
-                        headerAvatarImg.style.display = 'block';
-                    }
-                    if (headerAvatarIcon) headerAvatarIcon.style.display = 'none';
+                // Avatar updates
+                setTimeout(() => {
+                    const headerAvatarImg = document.getElementById('header-avatar-img');
+                    const headerAvatarIcon = document.getElementById('header-avatar-icon');
+                    const profilePageAvatarImg = document.getElementById('profile-page-avatar-img');
+                    const profilePageAvatarIcon = document.getElementById('profile-page-avatar-icon');
+                    const updateAvatarUrlInput = document.getElementById('update-avatar-url');
                     
-                    if (profilePageAvatarImg) {
-                        profilePageAvatarImg.src = data.avatarUrl;
-                        profilePageAvatarImg.style.display = 'block';
+                    if (data.avatarUrl) {
+                        if (headerAvatarImg) {
+                            headerAvatarImg.src = data.avatarUrl;
+                            headerAvatarImg.style.display = 'block';
+                        }
+                        if (headerAvatarIcon) headerAvatarIcon.style.display = 'none';
+                        
+                        if (profilePageAvatarImg) {
+                            profilePageAvatarImg.src = data.avatarUrl;
+                            profilePageAvatarImg.style.display = 'block';
+                        }
+                        if (profilePageAvatarIcon) profilePageAvatarIcon.style.display = 'none';
+                        if (updateAvatarUrlInput) updateAvatarUrlInput.value = data.avatarUrl;
+                    } else {
+                        if (headerAvatarImg) headerAvatarImg.style.display = 'none';
+                        if (headerAvatarIcon) headerAvatarIcon.style.display = 'block';
+                        
+                        if (profilePageAvatarImg) profilePageAvatarImg.style.display = 'none';
+                        if (profilePageAvatarIcon) profilePageAvatarIcon.style.display = 'flex';
+                        if (updateAvatarUrlInput) updateAvatarUrlInput.value = '';
                     }
-                    if (profilePageAvatarIcon) profilePageAvatarIcon.style.display = 'none';
-                    if (updateAvatarUrlInput) updateAvatarUrlInput.value = data.avatarUrl;
-                } else {
-                    if (headerAvatarImg) headerAvatarImg.style.display = 'none';
-                    if (headerAvatarIcon) headerAvatarIcon.style.display = 'block';
-                    
-                    if (profilePageAvatarImg) profilePageAvatarImg.style.display = 'none';
-                    if (profilePageAvatarIcon) profilePageAvatarIcon.style.display = 'flex';
-                    if (updateAvatarUrlInput) updateAvatarUrlInput.value = '';
-                }
+                }, 200);
             } else {
                 this.showToast(data.message || 'Failed to load profile', 'error');
             }
