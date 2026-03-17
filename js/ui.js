@@ -913,67 +913,19 @@ class UIController {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
-            console.log('Profile data:', data);
 
             if (res.ok) {
-                // Wait a bit for DOM to be ready, then update
-                const updateWithDelay = () => {
-                    console.log('=== updateWithDelay called ===');
-                    
-                    // Direct element updates
+                // Update all profile elements that exist
+                const updateElements = () => {
                     const username = document.getElementById('profile-display-username');
                     const email = document.getElementById('profile-display-email');
                     const password = document.getElementById('profile-display-password');
                     
-                    if (username) {
-                        console.log('Setting main username to:', data.username);
-                        username.textContent = data.username;
-                    }
+                    if (username) username.textContent = data.username;
+                    if (email) email.textContent = data.email;
+                    if (password) password.textContent = data.passwordHint || '********';
                     
-                    if (email) {
-                        console.log('Setting email to:', data.email);
-                        email.textContent = data.email;
-                    }
-                    if (password) {
-                        console.log('Setting password to:', data.passwordHint);
-                        password.textContent = data.passwordHint || '********';
-                    }
-                    
-                    // Special handling for username-info - try multiple methods
-                    let usernameInfo = document.getElementById('profile-display-username-info');
-                    if (!usernameInfo) {
-                        console.log('username-info not found by ID, trying querySelector...');
-                        usernameInfo = document.querySelector('#profile-display-username-info');
-                    }
-                    if (!usernameInfo) {
-                        console.log('username-info still not found, trying to find by searching all divs...');
-                        const allDivs = document.querySelectorAll('div');
-                        for (let div of allDivs) {
-                            if (div.id === 'profile-display-username-info') {
-                                usernameInfo = div;
-                                console.log('Found username-info by scanning all divs');
-                                break;
-                            }
-                        }
-                    }
-                    
-                    if (usernameInfo) {
-                        console.log('FOUND username-info, setting to:', data.username);
-                        usernameInfo.textContent = data.username;
-                    } else {
-                        console.warn('COULD NOT FIND profile-display-username-info element anywhere in DOM');
-                        console.log('Total divs in DOM:', document.querySelectorAll('div').length);
-                    }
-                };
-
-                // Try immediately, then again after delays
-                updateWithDelay();
-                setTimeout(updateWithDelay, 300);
-                setTimeout(updateWithDelay, 600);
-                setTimeout(updateWithDelay, 1000);
-                
-                // Avatar updates
-                setTimeout(() => {
+                    // Update avatar
                     const headerAvatarImg = document.getElementById('header-avatar-img');
                     const headerAvatarIcon = document.getElementById('header-avatar-icon');
                     const profilePageAvatarImg = document.getElementById('profile-page-avatar-img');
@@ -1001,7 +953,14 @@ class UIController {
                         if (profilePageAvatarIcon) profilePageAvatarIcon.style.display = 'flex';
                         if (updateAvatarUrlInput) updateAvatarUrlInput.value = '';
                     }
-                }, 200);
+                };
+
+                // Update immediately
+                updateElements();
+                
+                // Also try after a small delay to ensure DOM is ready
+                setTimeout(updateElements, 500);
+                
             } else {
                 this.showToast(data.message || 'Failed to load profile', 'error');
             }
