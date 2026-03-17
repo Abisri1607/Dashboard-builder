@@ -915,7 +915,7 @@ class UIController {
             const data = await res.json();
 
             if (res.ok) {
-                // Update all profile elements that exist
+                // Update profile elements
                 const updateElements = () => {
                     const username = document.getElementById('profile-display-username');
                     const email = document.getElementById('profile-display-email');
@@ -924,6 +924,26 @@ class UIController {
                     if (username) username.textContent = data.username;
                     if (email) email.textContent = data.email;
                     if (password) password.textContent = data.passwordHint || '********';
+                    
+                    // Try to find username-info by searching for it
+                    let usernameInfo = document.getElementById('profile-display-username-info');
+                    if (!usernameInfo) {
+                        // Fallback: find by selector or search for div containing "Loading..." after Username label
+                        const allLabels = document.querySelectorAll('label');
+                        for (let label of allLabels) {
+                            if (label.textContent.includes('Username')) {
+                                const parent = label.closest('.info-group') || label.parentElement;
+                                if (parent) {
+                                    usernameInfo = parent.querySelector('div[style*="font-size"]') || parent.querySelector('div:last-child');
+                                    if (usernameInfo) break;
+                                }
+                            }
+                        }
+                    }
+                    
+                    if (usernameInfo && usernameInfo.textContent.includes('Loading')) {
+                        usernameInfo.textContent = data.username;
+                    }
                     
                     // Update avatar
                     const headerAvatarImg = document.getElementById('header-avatar-img');
