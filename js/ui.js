@@ -920,31 +920,11 @@ class UIController {
                 const updateWithDelay = () => {
                     console.log('=== updateWithDelay called ===');
                     
-                    // Method 1: Direct ID lookup
+                    // Direct element updates
                     const username = document.getElementById('profile-display-username');
                     const email = document.getElementById('profile-display-email');
                     const password = document.getElementById('profile-display-password');
                     
-                    // Method 2: Search for all divs with "Loading..." text and update them
-                    const allDivs = document.querySelectorAll('div[id*="profile-display"]');
-                    console.log('Found divs with profile-display ID:', allDivs.length);
-                    
-                    allDivs.forEach(div => {
-                        console.log('Found element:', div.id, 'Text:', div.textContent);
-                        if (div.id === 'profile-display-username-info' && div.textContent.includes('Loading')) {
-                            console.log('Updating username-info div');
-                            div.textContent = data.username;
-                        }
-                        if (div.id === 'profile-display-email' && div.textContent.includes('Loading')) {
-                            console.log('Updating email div');
-                            div.textContent = data.email;
-                        }
-                        if (div.id === 'profile-display-password') {
-                            console.log('Updating password div');
-                            div.textContent = data.passwordHint || '********';
-                        }
-                    });
-
                     if (username) {
                         console.log('Setting main username to:', data.username);
                         username.textContent = data.username;
@@ -957,6 +937,32 @@ class UIController {
                     if (password) {
                         console.log('Setting password to:', data.passwordHint);
                         password.textContent = data.passwordHint || '********';
+                    }
+                    
+                    // Special handling for username-info - try multiple methods
+                    let usernameInfo = document.getElementById('profile-display-username-info');
+                    if (!usernameInfo) {
+                        console.log('username-info not found by ID, trying querySelector...');
+                        usernameInfo = document.querySelector('#profile-display-username-info');
+                    }
+                    if (!usernameInfo) {
+                        console.log('username-info still not found, trying to find by searching all divs...');
+                        const allDivs = document.querySelectorAll('div');
+                        for (let div of allDivs) {
+                            if (div.id === 'profile-display-username-info') {
+                                usernameInfo = div;
+                                console.log('Found username-info by scanning all divs');
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (usernameInfo) {
+                        console.log('FOUND username-info, setting to:', data.username);
+                        usernameInfo.textContent = data.username;
+                    } else {
+                        console.warn('COULD NOT FIND profile-display-username-info element anywhere in DOM');
+                        console.log('Total divs in DOM:', document.querySelectorAll('div').length);
                     }
                 };
 
