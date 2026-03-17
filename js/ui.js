@@ -911,9 +911,15 @@ class UIController {
             });
             const data = await res.json();
             console.log('Profile data:', data);
+            console.log('profileDisplayUsername element:', this.profileDisplayUsername);
+            console.log('Username value to set:', data.username);
 
             if (res.ok) {
-                if(this.profileDisplayUsername) this.profileDisplayUsername.textContent = data.username;
+                if(this.profileDisplayUsername) {
+                    console.log('Setting username to:', data.username);
+                    this.profileDisplayUsername.textContent = data.username;
+                    console.log('After setting, element text is:', this.profileDisplayUsername.textContent);
+                }
                 if(this.profileDisplayUsernameInfo) this.profileDisplayUsernameInfo.textContent = data.username;
                 if(this.profileDisplayEmail) this.profileDisplayEmail.textContent = data.email;
                 if(this.profileDisplayPassword) this.profileDisplayPassword.textContent = data.passwordHint || '********';
