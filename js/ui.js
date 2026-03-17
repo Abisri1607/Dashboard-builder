@@ -916,25 +916,25 @@ class UIController {
             console.log('Profile data:', data);
 
             if (res.ok) {
-                // Use direct querySelector to ensure we're updating the right elements
-                const usernameEl = document.getElementById('profile-display-username');
-                const usernameInfoEl = document.getElementById('profile-display-username-info');
-                const emailEl = document.getElementById('profile-display-email');
-                const passwordEl = document.getElementById('profile-display-password');
-                
-                console.log('Direct querySelector - username element:', usernameEl);
-                console.log('Direct querySelector - username info element:', usernameInfoEl);
-                
-                if(usernameEl) {
-                    console.log('Updating username to:', data.username);
-                    usernameEl.textContent = data.username;
-                }
-                if(usernameInfoEl) {
-                    console.log('Updating username info to:', data.username);
-                    usernameInfoEl.textContent = data.username;
-                }
-                if(emailEl) emailEl.textContent = data.email;
-                if(passwordEl) passwordEl.textContent = data.passwordHint || '********';
+                // Helper function to update element with retry
+                const updateElement = (elementId, value, retries = 3, delay = 100) => {
+                    const el = document.getElementById(elementId);
+                    if (el) {
+                        console.log(`Updating ${elementId} to:`, value);
+                        el.textContent = value;
+                    } else if (retries > 0) {
+                        console.log(`Element ${elementId} not found yet, retrying...`);
+                        setTimeout(() => updateElement(elementId, value, retries - 1, delay), delay);
+                    } else {
+                        console.warn(`Element ${elementId} not found after retries`);
+                    }
+                };
+
+                // Update all profile fields
+                updateElement('profile-display-username', data.username);
+                updateElement('profile-display-username-info', data.username);
+                updateElement('profile-display-email', data.email);
+                updateElement('profile-display-password', data.passwordHint || '********');
                 
                 // Avatar updates - also use direct selectors
                 const headerAvatarImg = document.getElementById('header-avatar-img');
