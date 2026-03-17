@@ -918,17 +918,27 @@ class UIController {
             if (res.ok) {
                 // Wait a bit for DOM to be ready, then update
                 const updateWithDelay = () => {
-                    // Use direct DOM queries
-                    const username = document.getElementById('profile-display-username');
-                    const usernameInfo = document.getElementById('profile-display-username-info');
-                    const email = document.getElementById('profile-display-email');
-                    const password = document.getElementById('profile-display-password');
+                    // Get the profile view container
+                    const profileView = document.getElementById('view-profile');
+                    console.log('Profile view found:', !!profileView);
+                    
+                    // Try to find elements both globally and within profile view
+                    let username = document.getElementById('profile-display-username');
+                    let usernameInfo = profileView ? profileView.querySelector('#profile-display-username-info') : document.getElementById('profile-display-username-info');
+                    let email = profileView ? profileView.querySelector('#profile-display-email') : document.getElementById('profile-display-email');
+                    let password = profileView ? profileView.querySelector('#profile-display-password') : document.getElementById('profile-display-password');
+                    
+                    // Fallback to global queries if not found in profile view
+                    if (!usernameInfo) usernameInfo = document.getElementById('profile-display-username-info');
+                    if (!email) email = document.getElementById('profile-display-email');
+                    if (!password) password = document.getElementById('profile-display-password');
                     
                     console.log('Elements found:', {
                         username: !!username,
                         usernameInfo: !!usernameInfo,
                         email: !!email,
-                        password: !!password
+                        password: !!password,
+                        usernameInfoElement: usernameInfo ? usernameInfo.id : 'null'
                     });
 
                     if (username) {
@@ -949,9 +959,11 @@ class UIController {
                     }
                 };
 
-                // Try immediately, then again after delay
+                // Try immediately, then again after delays
                 updateWithDelay();
-                setTimeout(updateWithDelay, 200);
+                setTimeout(updateWithDelay, 300);
+                setTimeout(updateWithDelay, 600);
+                setTimeout(updateWithDelay, 1000);
                 
                 // Avatar updates
                 setTimeout(() => {
