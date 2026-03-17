@@ -918,37 +918,38 @@ class UIController {
             if (res.ok) {
                 // Wait a bit for DOM to be ready, then update
                 const updateWithDelay = () => {
-                    // Get the profile view container
-                    const profileView = document.getElementById('view-profile');
-                    console.log('Profile view found:', !!profileView);
+                    console.log('=== updateWithDelay called ===');
                     
-                    // Try to find elements both globally and within profile view
-                    let username = document.getElementById('profile-display-username');
-                    let usernameInfo = profileView ? profileView.querySelector('#profile-display-username-info') : document.getElementById('profile-display-username-info');
-                    let email = profileView ? profileView.querySelector('#profile-display-email') : document.getElementById('profile-display-email');
-                    let password = profileView ? profileView.querySelector('#profile-display-password') : document.getElementById('profile-display-password');
+                    // Method 1: Direct ID lookup
+                    const username = document.getElementById('profile-display-username');
+                    const email = document.getElementById('profile-display-email');
+                    const password = document.getElementById('profile-display-password');
                     
-                    // Fallback to global queries if not found in profile view
-                    if (!usernameInfo) usernameInfo = document.getElementById('profile-display-username-info');
-                    if (!email) email = document.getElementById('profile-display-email');
-                    if (!password) password = document.getElementById('profile-display-password');
+                    // Method 2: Search for all divs with "Loading..." text and update them
+                    const allDivs = document.querySelectorAll('div[id*="profile-display"]');
+                    console.log('Found divs with profile-display ID:', allDivs.length);
                     
-                    console.log('Elements found:', {
-                        username: !!username,
-                        usernameInfo: !!usernameInfo,
-                        email: !!email,
-                        password: !!password,
-                        usernameInfoElement: usernameInfo ? usernameInfo.id : 'null'
+                    allDivs.forEach(div => {
+                        console.log('Found element:', div.id, 'Text:', div.textContent);
+                        if (div.id === 'profile-display-username-info' && div.textContent.includes('Loading')) {
+                            console.log('Updating username-info div');
+                            div.textContent = data.username;
+                        }
+                        if (div.id === 'profile-display-email' && div.textContent.includes('Loading')) {
+                            console.log('Updating email div');
+                            div.textContent = data.email;
+                        }
+                        if (div.id === 'profile-display-password') {
+                            console.log('Updating password div');
+                            div.textContent = data.passwordHint || '********';
+                        }
                     });
 
                     if (username) {
-                        console.log('Setting username to:', data.username);
+                        console.log('Setting main username to:', data.username);
                         username.textContent = data.username;
                     }
-                    if (usernameInfo) {
-                        console.log('Setting username info to:', data.username);
-                        usernameInfo.textContent = data.username;
-                    }
+                    
                     if (email) {
                         console.log('Setting email to:', data.email);
                         email.textContent = data.email;
