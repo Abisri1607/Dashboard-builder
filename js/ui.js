@@ -910,6 +910,7 @@ class UIController {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             const data = await res.json();
+            console.log('Profile data:', data);
 
             if (res.ok) {
                 if(this.profileDisplayUsername) this.profileDisplayUsername.textContent = data.username;
